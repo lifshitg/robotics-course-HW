@@ -113,7 +113,7 @@ git push -u origin hw01
    source to your fork's assignment branch, such as `hw01`.
 3. Title the PR with the assignment and all submitting students' names:
    `HW01 — Firstname Lastname, Firstname Lastname`.
-4. Include a brief description, check results, and report/demonstration links.
+4. Include a brief description, check results, and report/demonstration links as mentioned in the assignment instructions.
 5. Open the PR as ready for review before the deadline.
 
 Use one PR per assignment per student or group. Push further updates to the same
