@@ -158,6 +158,7 @@ with `preset:=2` or `preset:=3`. Run only one instance per domain/partition.
 
 ## 6. Check the camera and controllers
 
+Keep the simulation from [step 5](#5-start-the-simulation) running in terminal A.
 In terminal B, after sourcing:
 
 ```bash
@@ -190,6 +191,7 @@ Both controllers should be `active`. Stop continuous commands with Ctrl+C.
 
 ## 7. Run the readiness demo
 
+Keep the simulation from [step 5](#5-start-the-simulation) running in terminal A.
 From a sourced terminal B:
 
 ```bash

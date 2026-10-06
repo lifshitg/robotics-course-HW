@@ -6,7 +6,16 @@ Read [the assignment](../instructions.md) and finish the
 
 ## Run the example
 
-Keep the simulation running in another terminal. From the repository root:
+Start the simulation in terminal A from the repository root after completing
+[the environment setup](../environment/README.md#5-start-the-simulation):
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source assignments/hw01/environment/install/setup.bash
+ros2 launch hw01_sim simulation.launch.py preset:=1
+```
+
+Keep terminal A running. In terminal B, from the repository root:
 
 ```bash
 source /opt/ros/jazzy/setup.bash

@@ -8,9 +8,20 @@ From the repository root, run the supplied helper's math checks:
 python3 -m pytest -q assignments/hw01/tests/test_helper.py
 ```
 
-With the shared environment built and sourced, and Gazebo running:
+After [building the shared environment](../environment/README.md#4-fork-and-build-the-shared-environment),
+start the simulation in terminal A from the repository root:
 
 ```bash
+source /opt/ros/jazzy/setup.bash
+source assignments/hw01/environment/install/setup.bash
+ros2 launch hw01_sim simulation.launch.py preset:=1
+```
+
+Keep terminal A running. In terminal B, from the repository root:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source assignments/hw01/environment/install/setup.bash
 ros2 run hw01_sim readiness_demo
 python3 assignments/hw01/my_solution/check_setup.py
 ```

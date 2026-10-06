@@ -21,7 +21,8 @@ PDFs can be generated from the same content.
 
 HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
 and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
-then run the [small student example](assignments/hw01/my_solution/README.md).
+then [start the simulation](assignments/hw01/environment/README.md#5-start-the-simulation)
+and run the [small student example](assignments/hw01/my_solution/README.md).
 Students create their own assignment implementation. See the
 [verification record](assignments/hw01/environment/VERIFICATION.md) for tested
 configurations and remaining release gates. Additional assignments will follow.
