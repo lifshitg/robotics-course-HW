@@ -2,7 +2,7 @@
 
 This is the working repository for the practical assignments in the Robotics &
 Autonomous Systems course. It provides assignment instructions, simulation and
-development environments, student starter code, and public checks.
+development environments, small setup examples, and public checks.
 
 Students fork this repository, complete each assignment on a separate branch in
 their fork, and submit a pull request (PR) to this repository. The course repository
@@ -17,11 +17,23 @@ PDFs can be generated from the same content.
 
 | Assignment | Topic | Status |
 | --- | --- | --- |
-| [HW1](assignments/hw01/instructions.md) | ROS 2, transforms, and Gazebo | Scaffold; not yet released |
+| [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Implemented draft; release checks pending |
 
-Additional assignment folders will be added as the course progresses. HW1 currently
-contains the folder structure and draft documentation. Its runnable environment,
-starter code, public checks, and PDF generation are still to be implemented.
+HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
+and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
+then run the [small student example](assignments/hw01/my_solution/README.md).
+Students create their own assignment implementation. See the
+[verification record](assignments/hw01/environment/VERIFICATION.md) for tested
+configurations and remaining release gates. Additional assignments will follow.
+
+To generate the HW1 handout with the installation guide as an appendix:
+
+```bash
+python3 tools/build_hw01_pdf.py
+```
+
+Install the PDF tools listed in the installation guide first. The output is
+`build/hw01/hw01.pdf`; generated files are ignored by Git.
 
 ## Repository structure
 
@@ -35,7 +47,7 @@ robotics-course-HW/
         ├── instructions.md    # Assignment requirements and PDF source
         ├── assets/            # Instruction figures and diagrams
         ├── environment/       # Shared dependencies and simulation setup
-        ├── my_solution/       # Student starter files and submitted work
+        ├── my_solution/       # Setup example and student submissions
         └── tests/             # Public checks students can run
 ```
 
@@ -45,7 +57,7 @@ Each assignment follows the same structure:
 - **`assets/`:** Figures and diagrams referenced by the instructions.
 - **`environment/`:** Setup instructions, dependencies, robot models, and simulation
   configuration shared by all implementations of the assignment.
-- **`my_solution/`:** Complete the starter files here and add your report and other
+- **`my_solution/`:** Run the setup example, then create your own code and add your report and
   required deliverables. This folder is tracked by Git and included in your PR.
 - **`tests/`:** Public checks and their run instructions.
 

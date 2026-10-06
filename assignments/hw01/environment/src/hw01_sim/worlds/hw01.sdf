@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <world name="hw01">
+    <physics name="physics" type="ignored"><max_step_size>0.002</max_step_size><real_time_factor>1</real_time_factor></physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors"><render_engine>ogre2</render_engine></plugin>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
+    <plugin filename="libhw01_observer.so" name="hw01::Observer"/>
+    <scene><ambient>0.7 0.7 0.7 1</ambient><background>0.8 0.85 0.9 1</background></scene>
+    <light name="sun" type="directional">
+      <pose>0 0 4 0 0 0</pose><direction>0.2 -0.3 -1</direction>
+      <diffuse>0.8 0.8 0.8 1</diffuse><specular>0.1 0.1 0.1 1</specular><cast_shadows>false</cast_shadows>
+    </light>
+    <model name="ground"><static>true</static><link name="ground_link">
+      <collision name="collision"><geometry><plane><normal>0 0 1</normal><size>4 4</size></plane></geometry></collision>
+      <visual name="visual"><geometry><plane><normal>0 0 1</normal><size>4 4</size></plane></geometry>
+        <material><ambient>0.55 0.55 0.55 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+      </visual>
+    </link></model>
+    <model name="platform"><static>true</static><pose>0.32 0 0.025 0 0 0</pose><link name="platform_link">
+      <collision name="platform_collision"><geometry><box><size>0.30 0.40 0.05</size></box></geometry></collision>
+      <visual name="visual"><geometry><box><size>0.30 0.40 0.05</size></box></geometry>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+      </visual>
+      <sensor name="contacts" type="contact"><always_on>true</always_on><update_rate>30</update_rate>
+        <topic>/hw01/platform_contacts</topic><contact><collision>platform_collision</collision></contact>
+      </sensor>
+    </link></model>
+    <model name="camera"><static>true</static><pose>0.30 0 1.0 0 1.5707963267948966 0</pose><link name="camera_link">
+      <sensor name="rgbd" type="rgbd_camera">
+        <topic>/hw01_camera</topic><update_rate>10</update_rate><always_on>true</always_on>
+        <gz_frame_id>camera_optical_frame</gz_frame_id>
+        <camera><horizontal_fov>1.0471975512</horizontal_fov>
+          <image><width>320</width><height>240</height><format>R8G8B8</format></image>
+          <clip><near>0.05</near><far>3</far></clip>
+          <depth_camera><clip><near>0.05</near><far>3</far></clip></depth_camera>
+          <optical_frame_id>camera_optical_frame</optical_frame_id>
+        </camera>
+      </sensor>
+    </link></model>
+  </world>
+</sdf>

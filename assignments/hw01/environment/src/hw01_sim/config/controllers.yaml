@@ -1,0 +1,21 @@
+controller_manager:
+  ros__parameters:
+    use_sim_time: true
+    update_rate: 100
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+arm_controller:
+  ros__parameters:
+    use_sim_time: true
+    joints: [shoulder_joint, elbow_joint]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    state_publish_rate: 30.0
+    action_monitor_rate: 20.0
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.05
+      shoulder_joint: {trajectory: 0.15, goal: 0.02}
+      elbow_joint: {trajectory: 0.15, goal: 0.02}
