@@ -150,9 +150,21 @@ Submit:
 - Readiness results and a short demonstration link showing camera data, commanded
   motion, and the public reach-check result for each preset.
 
-The course plan includes a short report and a 15-minute live Zoom defense per
-group. Be ready to explain your message flow and coordinate conventions. The
-teaching staff will announce the deadline and any grading weights before release.
+The teaching staff will announce the deadline and any grading weights before release.
+
+## Live demo
+
+The live demo will take place approximately one week after the submission deadline.
+The TA will post the meeting schedule. Each meeting lasts 10–15 minutes.
+
+You will demonstrate your implementation live, explain your approach and results,
+and answer questions about the theory and implementation. Have your simulation
+and solution ready to run. Be prepared to explain your detection method, depth
+reconstruction, message flow, coordinate frames, TF timing, and failure handling.
+
+If you submit as a group, all group members must attend. Every member must be
+ready to explain the work and answer questions about both the theory and
+implementation.
 
 ## Submission
 

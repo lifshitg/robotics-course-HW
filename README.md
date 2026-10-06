@@ -121,6 +121,19 @@ branch to update that PR. Staff will record the submitted commit at the deadline
 grade it, and close the PR without merging it. Deadlines will be announced per
 assignment. Public forks and PRs are visible to other students.
 
+## Live demo after submission
+
+The live demo will take place approximately one week after the submission deadline.
+The TA will post the meeting schedule. Each meeting lasts 10–15 minutes.
+
+During the meeting, you will demonstrate your work live, explain your approach,
+and answer questions about the theory and your implementation. Have your
+environment ready to run and be prepared to explain your code and results.
+
+If you submit as a group, all group members must attend the meeting. Every member
+must be ready to explain the work and answer questions about both the theory and
+implementation.
+
 ## Instructor development
 
 For local development, each assignment may also have a `ta_solution/` folder:
