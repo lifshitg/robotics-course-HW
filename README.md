@@ -19,6 +19,7 @@ PDFs can be generated from the same content.
 | --- | --- | --- |
 | [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Implemented draft; release checks pending |
 | [HW2](assignments/hw02/instructions.md) | Configuration space, PRM and A* navigation | Implemented draft; release checks pending |
+| [HW4](assignments/hw04/instructions.md) | REINFORCE and learned baselines in Swimmer | Implemented draft; current-machine checks pass |
 
 HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
 and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
@@ -34,6 +35,11 @@ PRM, A* and waypoint sequencing. Start with the
 [HW2 setup guide](assignments/hw02/environment/README.md) and
 [student examples](assignments/hw02/my_solution/README.md).
 Build its handout with `python3 tools/build_hw02_pdf.py`.
+HW4 uses Gymnasium MuJoCo `Swimmer-v5` for CPU-only policy-gradient learning.
+Students implement REINFORCE with and without a learned baseline. Start with the
+[HW4 setup guide](assignments/hw04/environment/README.md) and random-action demo.
+It needs no ROS or Gazebo. Build its handout with `python3 tools/build_hw04_pdf.py`.
+See its [verification record](assignments/hw04/environment/VERIFICATION.md) for runtime and limitations.
 Additional assignments will follow.
 
 To generate the HW1 handout with the installation guide as an appendix:
@@ -59,7 +65,8 @@ robotics-course-HW/
         ├── environment/       # Shared dependencies and simulation setup
         ├── my_solution/       # Setup example and student submissions
         └── tests/             # Public checks students can run
-    └── hw02/                  # Same layout; map and movement examples
+    ├── hw02/                  # Same layout; map and movement examples
+    └── hw04/                  # CPU MuJoCo setup and random-action example
 ```
 
 Each assignment follows the same structure:
