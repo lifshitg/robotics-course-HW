@@ -1,6 +1,9 @@
 # Local instructor solutions. Keep this rule before creating solution files.
 /assignments/*/ta_solution/
 
+# Local HW2 instructor implementation plan.
+/assignments/hw02/IMPLEMENTATION_PLAN.md
+
 # Generated assignment PDFs and other document build output.
 /build/
 
