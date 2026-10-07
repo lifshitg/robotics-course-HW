@@ -236,11 +236,43 @@ standard-deviation bands as confidence intervals or claim statistical certainty.
 ### Learning curves and runtime
 
 Log raw training episode return, cumulative environment steps, episode length,
-seed, method, and elapsed time. Plot return against cumulative training steps:
-show individual seeds and each method's mean with standard-deviation bands across
-seeds. If smoothing, disclose the window, apply it consistently, and retain raw
-logs. Align curves at corresponding step counts, not wall times. Report final
-evaluation separately; a training curve includes exploration and changing policies.
+seed, method, and elapsed time. Retain the raw logs used to generate your figures.
+A training curve includes exploration and changing policies; report final
+evaluation separately.
+
+### Required figures and results table
+
+Submit two figures with readable axes, legends, and captions. Their appearance
+and reward levels need not match the example figures.
+
+**Figure 1: Training learning curves, with two panels**
+
+- Left panel: all six **unsmoothed** individual seed curves (three per method),
+  with method and seed clearly identified.
+- Right panel: one mean curve per method, with shaded bands showing
+  **mean ± one sample standard deviation across the three seeds**.
+- X-axis: cumulative **training environment steps**, through 500,000.
+- Y-axis: **undiscounted training episode return**.
+- Compute across-seed statistics at matching training-step counts, not wall times.
+  State in the caption that the bands describe seed variability, not confidence
+  intervals. Optional additional smoothed curves must disclose their window,
+  apply it consistently, and preserve the raw logs.
+
+**Figure 2: Final evaluation comparison**
+
+- X-axis: the two methods. Y-axis: **final stochastic evaluation return**.
+- Show three points per method. Each point is one trained seed's mean return
+  over its ten final evaluation episodes.
+- Show one bar per method: the mean of those three seed means.
+- Error bars show **± one sample standard deviation of the three seed means**,
+  not the standard deviation across pooled evaluation episodes.
+- The caption must specify ten episodes per trained policy, reset seeds
+  **30000–30009**, stochastic actions, and no learning during evaluation.
+
+Include a results table with initial and final ten-episode evaluation mean and
+sample standard deviation for each method/seed. Also report each method's
+across-seed mean and sample standard deviation of those evaluation means, and
+measured runtime. Standard deviations are not confidence intervals.
 
 Record CPU model, package versions, thread settings, and total training/evaluation
 wall time. Use a small network and avoid rendering. A near-zero initial torque mean can
@@ -253,13 +285,26 @@ record; they are not a guarantee for every laptop.
 
 Keep your source and report under `assignments/hw04/my_solution/`:
 
-- Training/evaluation code and reproducible commands from the repository root.
+- Training/evaluation/plotting code and reproducible commands from the repository root.
 - Configuration and lightweight raw logs for all six required runs.
-- Learning-curve figures and a table of initial/final evaluation results per seed.
+- Both required figures and the initial/final evaluation results table described above.
 - A short report (approximately 3–5 pages) explaining the policy, returns,
-  bounded actions, baseline, fairness, runtime, observed variability, and limitations.
-- Setup-demo results and a brief demonstration of a trained swimmer, either live
-  rendering or a short recording. The demonstration is illustrative, not evaluation.
+  bounded actions, architecture, initialization, optimizers, baseline fitting,
+  randomness, fairness, runtime, observed variability, failures, and limitations.
+  Explain your design decisions and any changes from your initial design, with
+  reasons. Label optional experiments and protocol deviations separately from
+  the required comparison; disclose deviations explicitly.
+- Setup-demo results and commands for your own trained-policy viewer.
+
+### Live demonstration
+
+Prepare your own checkpoint viewer and demonstrate **both methods live**. For
+each method, choose and identify one training seed and load its **final**
+checkpoint. Render the swimmer without learning or retraining. Have commands
+ready to run from the repository root, and be ready to explain your code and
+observed behavior. Keep evidence for all three seeds per method in your figures,
+logs, and report; the live demonstration does not replace formal evaluation.
+A recording may supplement the required live demonstration.
 
 Save large checkpoints and temporary output under ignored root `build/hw04/`.
 Export the required small figures/logs into your submission directory. Document
@@ -276,9 +321,21 @@ live defense with every group member.
 
 ## Assessment and self-check
 
-There is no minimum reward threshold and the baseline is not required to win.
+There is **no minimum reward required to pass**, and the baseline is not required
+to outperform vanilla REINFORCE.
 Assessment covers implementation correctness, fair/reproducible experiments,
 clear evidence, and your explanation. Deadlines and weights are announced separately.
+
+For context, in the instructor's tested configuration, final ten-episode mean
+returns ranged approximately **83–146 for REINFORCE** and **111–177 with the
+learned baseline**, across three training seeds. All six policies showed sustained
+forward swimming. These results illustrate what is achievable under the required
+protocol; they are not guaranteed scores or grading thresholds.
+
+Learning curves may fluctuate substantially. Lower returns should prompt checks
+of action probabilities, returns, gradients, initialization, and baseline fitting.
+Report unsuccessful runs and explain your evidence honestly; do not hide a seed
+or tune on the final evaluation seeds to match the instructor's results.
 
 Before submitting, check return indexing and final rewards; verify policy gradients
 are finite and nonzero; ensure the policy loss cannot update baseline parameters;
