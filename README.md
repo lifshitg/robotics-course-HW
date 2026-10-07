@@ -18,6 +18,7 @@ PDFs can be generated from the same content.
 | Assignment | Topic | Status |
 | --- | --- | --- |
 | [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Implemented draft; release checks pending |
+| [HW2](assignments/hw02/instructions.md) | Configuration space, PRM and A* navigation | Implemented draft; release checks pending |
 
 HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
 and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
@@ -25,7 +26,15 @@ then [start the simulation](assignments/hw01/environment/README.md#5-start-the-s
 and run the [small student example](assignments/hw01/my_solution/README.md).
 Students create their own assignment implementation. See the
 [verification record](assignments/hw01/environment/VERIFICATION.md) for tested
-configurations and remaining release gates. Additional assignments will follow.
+configurations and remaining release gates.
+
+HW2 provides a circular mobile robot, three pillar rooms, an uninflated occupancy
+map and a single-destination `go_to` helper. Students implement configuration space,
+PRM, A* and waypoint sequencing. Start with the
+[HW2 setup guide](assignments/hw02/environment/README.md) and
+[student examples](assignments/hw02/my_solution/README.md).
+Build its handout with `python3 tools/build_hw02_pdf.py`.
+Additional assignments will follow.
 
 To generate the HW1 handout with the installation guide as an appendix:
 
@@ -44,12 +53,13 @@ robotics-course-HW/
 ├── TA_plan.md                 # Course and assignment plan
 ├── .gitignore                 # Local solutions, caches, and generated output
 └── assignments/
-    └── hw01/
+    ├── hw01/
         ├── instructions.md    # Assignment requirements and PDF source
         ├── assets/            # Instruction figures and diagrams
         ├── environment/       # Shared dependencies and simulation setup
         ├── my_solution/       # Setup example and student submissions
         └── tests/             # Public checks students can run
+    └── hw02/                  # Same layout; map and movement examples
 ```
 
 Each assignment follows the same structure:

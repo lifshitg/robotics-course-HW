@@ -24,7 +24,7 @@ The sessions are structured to progressively bridge theoretical concepts with pr
 | Assignment | Format | Core Deliverable |
 | :--- | :--- | :--- |
 | **HW1: ROS, Transforms & Gazebo** | Practical | Read a camera topic to detect a target point/object, transform coordinates from the camera frame to the robot base frame, and send motor/joint commands in Gazebo to reach it. |
-| **HW2: Search & Motion Planning** | Practical | Implement a search/motion planning algorithm (such as A* on an occupancy grid or PRM) to find a collision-free path for a robot navigating a maze to a goal state. |
+| **HW2: Search & Motion Planning** | Practical | Construct configuration space for a circular robot in a pillar room, build a PRM, run A* on its graph, visualize the roadmap/path and execute waypoints with the supplied single-destination helper. Demonstrate passable and blocked rooms. |
 | **HW3: Theoretical Foundations I** | Theory | Written mathematical problem set covering coordinate transformations, forward/inverse kinematics, and Markov Decision Processes (Bellman equations, Value/Policy Iteration). |
 | **HW4: RL in MuJoCo** | Practical | Train a continuous-control agent (e.g., PPO or SAC) in a standard MuJoCo environment, reporting training curves and evaluation rewards across multiple seeds. |
 | **HW5: Theoretical Foundations II** | Theory | Written problem set on advanced RL (policy gradient theorem, actor-critic variance reduction) and POMDPs (Bayesian belief updates, alpha-vectors, policy trees). |

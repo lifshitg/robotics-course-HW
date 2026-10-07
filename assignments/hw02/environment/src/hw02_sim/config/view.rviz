@@ -1,0 +1,40 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Global Options:
+    Fixed Frame: map
+  Displays:
+    - Class: rviz_default_plugins/Map
+      Name: Raw map
+      Enabled: true
+      Topic:
+        Value: /map
+        Durability Policy: Transient Local
+    - Class: rviz_default_plugins/Map
+      Name: Student configuration space
+      Enabled: false
+      Topic:
+        Value: /hw02/cspace
+        Durability Policy: Transient Local
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Robot footprint
+      Enabled: true
+      Topic:
+        Value: /hw02/markers
+        Durability Policy: Transient Local
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Student roadmap
+      Enabled: true
+      Topic:
+        Value: /hw02/roadmap
+        Durability Policy: Transient Local
+    - Class: rviz_default_plugins/Path
+      Name: Student path
+      Enabled: true
+      Topic:
+        Value: /hw02/planned_path
+        Durability Policy: Transient Local
+    - Class: rviz_default_plugins/TF
+      Name: Frames
+      Enabled: true
