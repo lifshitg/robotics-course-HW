@@ -138,10 +138,19 @@ responsibility.
 - The revised handout matches the corrected reference: gamma-1 finite horizon,
   averaged summed episode losses, separate per-episode returns, pre-fit baseline,
   repeated critic fits, seeds, budgets and isolated final evaluation.
-- The nine-page PDF builds with its setup appendix. Equations, workflow,
+- The updated 11-page PDF builds with its setup appendix. Equations, workflow,
   experimental requirements and installation commands were visually inspected;
   inline command spaces and PR-title formatting are preserved. The HW4-specific
   code filter leaves the HW1/HW2 PDF formatting unchanged.
+- After the submission update, all 13 tests passed again (13.71 seconds), and
+  the public demo and two public checks passed from a temporary directory without
+  TA files. `pip check` found no broken requirements, and public local documentation
+  links resolved. The PDF's figure definitions, seed-level statistical summaries,
+  both-method live-demo requirements and reward guidance were checked against the
+  current instructions; submission-page layout was visually inspected.
+  The public desktop demo also completed all 1,000 steps again with a PASS after
+  granting desktop access outside the sandbox; the same decoration fallback
+  warning was harmless. Rendering inside the sandbox could not connect to Wayland.
 - All public local documentation links resolve. TA sources, the Python virtual
   environment, checkpoints, PDF and private backup are ignored; no TA file is tracked.
 
