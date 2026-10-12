@@ -11,16 +11,17 @@ closed without merging student solutions into `main`.
 
 Assignment instructions are maintained as Markdown files here. These files will
 also serve as the source for the assignment PDFs, so the online instructions and
-PDFs can be generated from the same content.
+PDFs can be generated from the same content. The course Moodle website distributes
+the official PDFs; GitHub provides the code, datasets, and setup materials.
 
 ## Assignments
 
 | Assignment | Topic | Status |
 | --- | --- | --- |
-| [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Implemented draft; release checks pending |
-| [HW2](assignments/hw02/instructions.md) | Configuration space, PRM and A* navigation | Implemented draft; release checks pending |
-| [HW4](assignments/hw04/instructions.md) | REINFORCE and learned baselines in Swimmer | Implemented draft; current-machine checks pass |
-| [HW6](assignments/hw06/instructions.md) | Offline particle-filter SLAM with odometry and LiDAR | Implemented draft; current-machine checks pass |
+| [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Ready for publication |
+| [HW2](assignments/hw02/instructions.md) | Configuration space, PRM and A* navigation | Ready for publication |
+| [HW4](assignments/hw04/instructions.md) | REINFORCE and learned baselines in Swimmer | Ready for publication |
+| [HW6](assignments/hw06/instructions.md) | Offline particle-filter SLAM with odometry and LiDAR | Ready for publication |
 
 HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
 and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
@@ -28,7 +29,7 @@ then [start the simulation](assignments/hw01/environment/README.md#5-start-the-s
 and run the [small student example](assignments/hw01/my_solution/README.md).
 Students create their own assignment implementation. See the
 [verification record](assignments/hw01/environment/VERIFICATION.md) for tested
-configurations and remaining release gates.
+configurations and known limitations.
 
 HW2 provides a circular mobile robot, three pillar rooms, an uninflated occupancy
 map and a single-destination `go_to` helper. Students implement configuration space,
@@ -47,7 +48,8 @@ withheld. Students reconstruct maps and trajectories and visualize sequential
 processing. Start with the [HW6 setup guide](assignments/hw06/environment/README.md)
 and [data demo](assignments/hw06/my_solution/README.md). No ROS or live simulator is
 needed. Build its handout with `python3 tools/build_hw06_pdf.py`.
-Additional assignments will follow.
+HW3 and HW5 are theoretical assignments distributed separately; the readiness
+status above applies to the four practical assignments included in this repository.
 
 To generate the HW1 handout with the installation guide as an appendix:
 
@@ -57,6 +59,9 @@ python3 tools/build_hw01_pdf.py
 
 Install the PDF tools listed in the installation guide first. The output is
 `build/hw01/hw01.pdf`; generated files are ignored by Git.
+
+Publication PDFs are in ignored `build/publication/`: `HW01.pdf`, `HW02.pdf`,
+`HW04.pdf`, and `HW06.pdf`, ready for manual upload to Moodle.
 
 ## Repository structure
 
