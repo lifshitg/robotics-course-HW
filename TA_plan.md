@@ -28,7 +28,7 @@ The sessions are structured to progressively bridge theoretical concepts with pr
 | **HW3: Theoretical Foundations I** | Theory | Written mathematical problem set covering coordinate transformations, forward/inverse kinematics, and Markov Decision Processes (Bellman equations, Value/Policy Iteration). |
 | **HW4: RL in MuJoCo** | Practical | Implement episodic REINFORCE and extend it with a learned Monte Carlo value baseline in Swimmer-v5. Compare six CPU-only runs across three seeds, learning curves, and held-out evaluation returns; no ready-made RL algorithms. |
 | **HW5: Theoretical Foundations II** | Theory | Written problem set on advanced RL (policy gradient theorem, actor-critic variance reduction) and POMDPs (Bayesian belief updates, alpha-vectors, policy trees). |
-| **HW6: SLAM with PF** | Practical | Implement a Particle Filter for 2D mobile robot localization and occupancy-grid SLAM in a simulation environment with noisy sensor readings. |
+| **HW6: SLAM with PF** | Practical | Implement offline grid-based particle-filter SLAM from two noisy odometry/LiDAR datasets. Development includes answer maps/trajectories; assessment withholds them. Estimate trajectory/map, compare particle counts and show animated sequential processing without a live simulator. |
 
 ---
 

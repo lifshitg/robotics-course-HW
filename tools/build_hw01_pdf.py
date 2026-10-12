@@ -25,7 +25,7 @@ def document_links(document, base):
 
 def main(args=None):
     parser = argparse.ArgumentParser(description='Build an assignment and its installation appendix')
-    parser.add_argument('--assignment', choices=['hw01', 'hw02', 'hw04'], default='hw01')
+    parser.add_argument('--assignment', choices=['hw01', 'hw02', 'hw04', 'hw06'], default='hw01')
     assignment = parser.parse_args(args).assignment
     hw = ROOT / 'assignments' / assignment
     out = ROOT / 'build' / assignment
@@ -46,7 +46,7 @@ def main(args=None):
         'pandoc', str(combined), '--from=markdown', '--standalone', '--toc',
         '--pdf-engine=xelatex', '--resource-path=' + str(hw),
         '--include-in-header=' + str(ROOT / 'tools/pdf_header.tex'),
-        '--lua-filter=' + str(ROOT / 'tools' / ('pdf_code_hw04.lua' if assignment == 'hw04' else 'pdf_code.lua')),
+        '--lua-filter=' + str(ROOT / 'tools' / ('pdf_code_hw04.lua' if assignment in ('hw04', 'hw06') else 'pdf_code.lua')),
         '-V', 'papersize=a4', '-V', 'geometry:margin=22mm', '-V', 'fontsize=11pt',
         '-V', 'mainfont=DejaVu Serif', '-V', 'monofont=DejaVu Sans Mono',
         '-V', 'colorlinks=true', '--highlight-style=tango',

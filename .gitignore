@@ -20,3 +20,6 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Generated HW6 editable-install metadata.
+/assignments/hw06/environment/*.egg-info/

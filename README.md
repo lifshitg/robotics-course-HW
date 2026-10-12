@@ -20,6 +20,7 @@ PDFs can be generated from the same content.
 | [HW1](assignments/hw01/instructions.md) | Camera-guided reaching with a two-joint arm | Implemented draft; release checks pending |
 | [HW2](assignments/hw02/instructions.md) | Configuration space, PRM and A* navigation | Implemented draft; release checks pending |
 | [HW4](assignments/hw04/instructions.md) | REINFORCE and learned baselines in Swimmer | Implemented draft; current-machine checks pass |
+| [HW6](assignments/hw06/instructions.md) | Offline particle-filter SLAM with odometry and LiDAR | Implemented draft; current-machine checks pass |
 
 HW1 includes a local Gazebo world, a two-joint arm, RGB-D camera, motion helper,
 and public readiness checks. Start with the [installation guide](assignments/hw01/environment/README.md),
@@ -40,6 +41,12 @@ Students implement REINFORCE with and without a learned baseline. Start with the
 [HW4 setup guide](assignments/hw04/environment/README.md) and random-action demo.
 It needs no ROS or Gazebo. Build its handout with `python3 tools/build_hw04_pdf.py`.
 See its [verification record](assignments/hw04/environment/VERIFICATION.md) for runtime and limitations.
+HW6 supplies two offline odometry/LiDAR datasets for particle-filter SLAM. The
+development environment includes ground-truth answers; assessment answers are
+withheld. Students reconstruct maps and trajectories and visualize sequential
+processing. Start with the [HW6 setup guide](assignments/hw06/environment/README.md)
+and [data demo](assignments/hw06/my_solution/README.md). No ROS or live simulator is
+needed. Build its handout with `python3 tools/build_hw06_pdf.py`.
 Additional assignments will follow.
 
 To generate the HW1 handout with the installation guide as an appendix:
@@ -66,7 +73,8 @@ robotics-course-HW/
         ├── my_solution/       # Setup example and student submissions
         └── tests/             # Public checks students can run
     ├── hw02/                  # Same layout; map and movement examples
-    └── hw04/                  # CPU MuJoCo setup and random-action example
+    ├── hw04/                  # CPU MuJoCo setup and random-action example
+    └── hw06/                  # Offline datasets, geometry and display utilities
 ```
 
 Each assignment follows the same structure:

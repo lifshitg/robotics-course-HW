@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "name": "development",
+  "scans": 500,
+  "frequency_hz": 2.0,
+  "initial_pose": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "odometry_std": [
+    0.01,
+    0.005,
+    0.005
+  ],
+  "lidar": {
+    "beams": 181,
+    "range_min": 0.1,
+    "range_max": 8.0,
+    "range_std": 0.02,
+    "missing_probability": 0.01,
+    "extrinsics": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "status": {
+      "missing": 0,
+      "hit": 1,
+      "no_hit": 2
+    }
+  },
+  "grid": {
+    "origin": [
+      -6.0,
+      -5.0
+    ],
+    "resolution": 0.1,
+    "width": 120,
+    "height": 100
+  },
+  "sensors_sha256": "54856ce6b1e5b68c3cfb50e91f5eb966a0513ad8ea8bd37e3928eb4ff44ddc96"
+}
