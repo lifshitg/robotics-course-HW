@@ -47,24 +47,3 @@ Keep spinning your ROS node while the motion runs. When `future.done()` is true,
 subscription callback waiting for the result. Call `arm.cancel()` to cancel a
 pending motion. Only one motion may be active; coordinates use metres, and this
 arm's fixed tip height is 0.14 m. The helper handles kinematics for you.
-
-## Build your own assignment package
-
-Create your own ROS 2 Python package in this folder. Choose your own node structure
-and implement the assignment yourself. Keep `check_setup.py` as the original
-installation example.
-
-After creating your package, build it from the repository root:
-
-```bash
-colcon --log-base assignments/hw01/my_solution/log build \
-  --symlink-install --base-paths assignments/hw01/my_solution \
-  --build-base assignments/hw01/my_solution/build \
-  --install-base assignments/hw01/my_solution/install
-source assignments/hw01/my_solution/install/setup.bash
-ros2 run YOUR_PACKAGE YOUR_EXECUTABLE
-```
-
-Declare `hw01_sim` as a dependency of your package and any other ROS/Python packages
-you use. Add `report.md` with your approach, results, and demonstration link. Commit
-source files and the report, not build output, caches, or large recordings.

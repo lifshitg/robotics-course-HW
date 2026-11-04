@@ -4,7 +4,13 @@ title: "HW1: Camera-Guided Reaching with a Two-Joint Arm"
 
 # HW1: Camera-Guided Reaching with a Two-Joint Arm
 
-**Status: draft; not released until the installation and simulation checks pass.**
+The PDF handout is generated automatically from the Markdown assignment
+instructions and installation guide in the
+[course repository](https://github.com/lifshitg/robotics-course-HW), and reproduces
+their content.
+
+Gilad Lifshitz will upload a short video explaining the assignment to Moodle.
+We recommend watching it once it is available.
 
 ## Goal
 
@@ -131,9 +137,10 @@ checker **before** starting your implementation:
 ros2 run hw01_sim check_reach --preset 1
 ```
 
-It observes the measured `tool0` transform and live Gazebo platform/marker contact
-streams. For the selected preset, the tip must remain within **0.02 m** of the
-correct hover point for **2 simulated seconds**, with no detected contact. Missing
+It observes the measured `tool0` pose on `/hw01/measured_tip` and live Gazebo
+platform/marker contact streams. For the selected preset, the tip must remain
+within **0.02 m** of the correct hover point for **2 simulated seconds**, with no
+detected contact. Missing
 contact data does not count as proof of a collision-free run. The checker does not
 move the robot or implement perception.
 
@@ -147,8 +154,6 @@ Submit:
 - Your own runnable ROS 2 package under `my_solution/`, with dependencies declared.
 - `report.md`: explain detection, depth reconstruction, TF direction/timing, failure
   handling, and results for all three presets. Include your exact build/run commands.
-- Readiness results and a short demonstration link showing camera data, commanded
-  motion, and the public reach-check result for each preset.
 
 The teaching staff will announce the deadline and any grading weights before release.
 
@@ -171,5 +176,5 @@ implementation.
 Follow the [repository submission process](../../README.md#submitting-an-assignment).
 Use one `hw01` branch and one PR per student or group. Title it
 `HW01 — Firstname Lastname` or `HW01 — Firstname Lastname, Firstname Lastname`.
-Include all members' names, check results, and report/demonstration links. Staff
+Include all members' names and a link to your report. Staff
 record the submitted commit at the deadline and close the PR without merging it.

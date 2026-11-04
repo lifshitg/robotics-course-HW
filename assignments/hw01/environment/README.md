@@ -2,15 +2,34 @@
 
 **Status: draft; see [verification results](VERIFICATION.md) before distributing.**
 
-Use **Ubuntu 24.04 LTS, ROS 2 Jazzy, and Gazebo Harmonic**. This environment uses
+This guide targets **Ubuntu 24.04 LTS, ROS 2 Jazzy, and Gazebo Harmonic**.
+The commands below are written for this combination. This environment uses
 standard ROS/Gazebo control components and our small local arm model. You do not
 need MoveIt, UR packages, physical robot hardware, or model downloads from Gazebo
 Fuel. An internet connection is needed during package installation.
 
 ## 1. Prepare Ubuntu
 
-Use native Ubuntu 24.04 when possible. Windows/macOS users should run Ubuntu 24.04
-in a VM with working accelerated graphics. As a starting allocation, use 4 CPU
+Use native Ubuntu 24.04 when possible. If you use Windows, macOS, or another
+operating system, you are responsible for arranging a suitable Ubuntu environment.
+Options include:
+
+- An Ubuntu 24.04 virtual machine (VM).
+- Docker to isolate the Ubuntu dependencies instead of installing them directly
+  on your host OS; you must configure graphics and ROS networking yourself.
+- Ubuntu 24.04 installed alongside your current OS using dual boot.
+- A separate computer, including an older machine capable of running the simulation,
+  with Ubuntu 24.04 installed.
+
+These are options to configure yourself, not tested setups supplied by this guide.
+Whichever option you choose, camera rendering must work and all readiness checks
+below must pass. See the [verification record](VERIFICATION.md) for testing limits.
+
+A VM on the university servers may also be available. Access requires the
+university VPN, and this option may not make setup easier. If you are interested,
+contact **Gilad Lifshitz**.
+
+For a local VM, use working accelerated graphics. As a starting allocation, use 4 CPU
 cores, 8 GB RAM and 30 GB free disk; these are planning suggestions, not measured
 minimum requirements. Install guest tools and enable 3D acceleration. A VM that
 cannot render the camera is not ready even if the arm appears.
@@ -271,14 +290,3 @@ do not bypass its camera checks.
 Stop your own node and diagnostic viewers, then Ctrl+C the simulation launch.
 Wait for its processes to exit before relaunching. Do not reuse stale camera data
 or TF from a prior run. A new launch resets the world and arm to home.
-
-## PDF tools (instructor only)
-
-PDF generation is optional for students and is not needed to run HW1:
-
-```bash
-sudo apt install pandoc texlive-xetex texlive-fonts-recommended fonts-dejavu-core
-python3 tools/build_hw01_pdf.py
-```
-
-Run the build command from the repository root. Output is `build/hw01/hw01.pdf`.

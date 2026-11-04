@@ -36,32 +36,20 @@ map and a single-destination `go_to` helper. Students implement configuration sp
 PRM, A* and waypoint sequencing. Start with the
 [HW2 setup guide](assignments/hw02/environment/README.md) and
 [student examples](assignments/hw02/my_solution/README.md).
-Build its handout with `python3 tools/build_hw02_pdf.py`.
+
 HW4 uses Gymnasium MuJoCo `Swimmer-v5` for CPU-only policy-gradient learning.
 Students implement REINFORCE with and without a learned baseline. Start with the
 [HW4 setup guide](assignments/hw04/environment/README.md) and random-action demo.
-It needs no ROS or Gazebo. Build its handout with `python3 tools/build_hw04_pdf.py`.
+It needs no ROS or Gazebo.
 See its [verification record](assignments/hw04/environment/VERIFICATION.md) for runtime and limitations.
 HW6 supplies two offline odometry/LiDAR datasets for particle-filter SLAM. The
 development environment includes ground-truth answers; assessment answers are
 withheld. Students reconstruct maps and trajectories and visualize sequential
 processing. Start with the [HW6 setup guide](assignments/hw06/environment/README.md)
 and [data demo](assignments/hw06/my_solution/README.md). No ROS or live simulator is
-needed. Build its handout with `python3 tools/build_hw06_pdf.py`.
+needed.
 HW3 and HW5 are theoretical assignments distributed separately; the readiness
 status above applies to the four practical assignments included in this repository.
-
-To generate the HW1 handout with the installation guide as an appendix:
-
-```bash
-python3 tools/build_hw01_pdf.py
-```
-
-Install the PDF tools listed in the installation guide first. The output is
-`build/hw01/hw01.pdf`; generated files are ignored by Git.
-
-Publication PDFs are in ignored `build/publication/`: `HW01.pdf`, `HW02.pdf`,
-`HW04.pdf`, and `HW06.pdf`, ready for manual upload to Moodle.
 
 ## Repository structure
 
@@ -143,7 +131,7 @@ git push -u origin hw01
    source to your fork's assignment branch, such as `hw01`.
 3. Title the PR with the assignment and all submitting students' names:
    `HW01 — Firstname Lastname, Firstname Lastname`.
-4. Include a brief description, check results, and report/demonstration links as mentioned in the assignment instructions.
+4. Include a brief description and the report or other deliverables requested in the assignment instructions.
 5. Open the PR as ready for review before the deadline.
 
 Use one PR per assignment per student or group. Push further updates to the same
