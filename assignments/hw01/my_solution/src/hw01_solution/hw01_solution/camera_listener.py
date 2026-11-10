@@ -1,4 +1,4 @@
-"""Find the red marker in RGB images."""
+"""Find the red marker in RGB/depth images and measure its depth."""
 
 from dataclasses import dataclass
 import math
@@ -8,6 +8,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+MIN_CAMERA_DEPTH_METRES = 0.05
+MAX_CAMERA_DEPTH_METRES = 3.0
 MIN_REGION_PIXELS = 20
 
 
@@ -80,3 +82,23 @@ def detect_marker(mask: NDArray[np.uint8]) -> tuple[MarkerDetection | None, str]
         return None, reason
     u, v = centers[region]
     return MarkerDetection((float(u), float(v)), region_mask), 'Marker region accepted.'
+
+
+def measure_marker_depth(
+    depth_pixels: NDArray[np.float32], marker_mask: NDArray[np.uint8]
+) -> tuple[float | None, str]:
+    """
+    Return the median valid optical-Z depth inside the marker mask.
+
+    Valid means finite and inside the camera clip range. The median ignores a
+    few bad edge pixels. Returns (None, reason) if no sample is valid.
+    """
+    samples = depth_pixels[marker_mask != 0]
+    valid = samples[
+        np.isfinite(samples)
+        & (samples >= MIN_CAMERA_DEPTH_METRES)
+        & (samples <= MAX_CAMERA_DEPTH_METRES)
+    ]
+    if valid.size == 0:
+        return None, 'No valid marker depth samples.'
+    return float(np.median(valid)), 'Marker depth accepted.'
