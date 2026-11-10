@@ -1,16 +1,24 @@
-"""Find the red marker in RGB/depth images and measure its depth."""
+"""Find the red marker in synchronized RGB/depth images and measure its depth."""
 
 from dataclasses import dataclass
 import math
 
 import cv2
+from cv_bridge import CvBridge
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 import numpy as np
 from numpy.typing import NDArray
+import rclpy
+from rclpy.executors import ExternalShutdownException
+from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
+from sensor_msgs.msg import CameraInfo, Image
 
 
 MIN_CAMERA_DEPTH_METRES = 0.05
 MAX_CAMERA_DEPTH_METRES = 3.0
 MIN_REGION_PIXELS = 20
+SYNC_SLOP_SECONDS = 0.05
 
 
 def make_red_mask(rgb_pixels: NDArray[np.uint8]) -> NDArray[np.uint8]:
@@ -102,3 +110,99 @@ def measure_marker_depth(
     if valid.size == 0:
         return None, 'No valid marker depth samples.'
     return float(np.median(valid)), 'Marker depth accepted.'
+
+
+def _check_depth_matches(depth: Image, rgb: Image) -> None:
+    """Raise ValueError unless depth is 32FC1 and aligned with the RGB image."""
+    if depth.encoding != '32FC1':
+        raise ValueError('Expected 32FC1 depth values in metres.')
+    if (depth.width, depth.height) != (rgb.width, rgb.height):
+        raise ValueError('Depth and RGB dimensions differ.')
+    if not rgb.header.frame_id or depth.header.frame_id != rgb.header.frame_id:
+        raise ValueError('Depth must share the nonempty RGB optical frame.')
+
+
+def _decoded(pixels: NDArray | None) -> NDArray:
+    """Raise ValueError if CvBridge returned no pixels (it does not always raise)."""
+    if pixels is None or pixels.size == 0:
+        raise ValueError('Image has no pixels.')
+    return pixels
+
+
+class CameraListener(Node):
+    """Synchronize RGB/depth and decode each matched pair."""
+
+    def __init__(self, node_name: str = 'camera_listener', **node_options) -> None:
+        """Subscribe to RGB, depth (synchronized) and camera info."""
+        super().__init__(node_name, **node_options)
+        self.bridge = CvBridge()
+        self.camera_info: CameraInfo | None = None
+        self.latest_rgb_pixels: NDArray[np.uint8] | None = None
+        self.latest_depth_pixels: NDArray[np.float32] | None = None
+
+        qos = qos_profile_sensor_data
+        self.image_subscription = Subscriber(self, Image, '/camera/image_raw', qos_profile=qos)
+        self.depth_subscription = Subscriber(
+            self, Image, '/camera/depth/image_raw', qos_profile=qos
+        )
+        self.image_synchronizer = ApproximateTimeSynchronizer(
+            [self.image_subscription, self.depth_subscription],
+            queue_size=10,
+            slop=SYNC_SLOP_SECONDS,
+        )
+        self.image_synchronizer.registerCallback(self.on_synchronized_images)
+        self.create_subscription(CameraInfo, '/camera/camera_info', self.on_camera_info, qos)
+        self.get_logger().info('Waiting for RGB, depth and camera calibration.')
+
+    def on_camera_info(self, message: CameraInfo) -> None:
+        """Keep the latest calibration."""
+        self.camera_info = message
+
+    def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
+        """Decode a matched pair of RGB and depth images."""
+        self.latest_depth_pixels = None
+        self.update_rgb_pixels(rgb)
+        if self.latest_rgb_pixels is None:
+            return
+        self.update_depth_pixels(depth, rgb)
+
+    def update_rgb_pixels(self, rgb: Image) -> None:
+        """Decode RGB into a (height, width, 3) uint8 array, or None on error."""
+        self.latest_rgb_pixels = None
+        try:
+            self.latest_rgb_pixels = _decoded(
+                self.bridge.imgmsg_to_cv2(rgb, desired_encoding='rgb8')
+            )
+        except Exception as error:
+            self.get_logger().error(f'Cannot decode RGB image ({rgb.encoding}): {error}')
+
+    def update_depth_pixels(self, depth: Image, rgb: Image) -> None:
+        """Decode aligned depth into a (height, width) float32 array, or None."""
+        self.latest_depth_pixels = None
+        try:
+            _check_depth_matches(depth, rgb)
+            self.latest_depth_pixels = _decoded(
+                self.bridge.imgmsg_to_cv2(depth, desired_encoding='passthrough')
+            )
+        except Exception as error:
+            self.get_logger().error(
+                f'Cannot decode aligned depth image ({depth.encoding}): {error}'
+            )
+
+
+def main(args=None) -> None:
+    """Run the camera listener until interrupted."""
+    rclpy.init(args=args)
+    node = CameraListener()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
