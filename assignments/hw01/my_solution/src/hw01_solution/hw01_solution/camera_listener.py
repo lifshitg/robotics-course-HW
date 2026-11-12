@@ -130,7 +130,7 @@ def _decoded(pixels: NDArray | None) -> NDArray:
 
 
 class CameraListener(Node):
-    """Synchronize RGB/depth, then store the marker pixel center."""
+    """Synchronize RGB/depth, then store the marker pixel center and depth."""
 
     def __init__(self, node_name: str = 'camera_listener', **node_options) -> None:
         """Subscribe to RGB, depth (synchronized) and camera info."""
@@ -141,7 +141,9 @@ class CameraListener(Node):
         self.latest_depth_pixels: NDArray[np.float32] | None = None
         self.latest_red_mask: NDArray[np.uint8] | None = None
         self.latest_marker: MarkerDetection | None = None
+        self.latest_marker_depth: float | None = None
         self._marker_reason: str | None = None
+        self._depth_reason: str | None = None
 
         qos = qos_profile_sensor_data
         self.image_subscription = Subscriber(self, Image, '/camera/image_raw', qos_profile=qos)
@@ -162,17 +164,22 @@ class CameraListener(Node):
         self.camera_info = message
 
     def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
-        """Decode a matched pair and find the marker."""
+        """Decode a matched pair, find the marker and measure its depth."""
         self.latest_red_mask = None
         self.latest_marker = None
         self.latest_depth_pixels = None
+        self.latest_marker_depth = None
         self.update_rgb_pixels(rgb)
         if self.latest_rgb_pixels is None:
-            self._marker_reason = 'RGB decoding failed.'
+            self._marker_reason = self._depth_reason = 'RGB decoding failed.'
             return
         self.update_depth_pixels(depth, rgb)
         self.latest_red_mask = make_red_mask(self.latest_rgb_pixels)
         self.update_marker(self.latest_red_mask)
+        if self.latest_marker is None:
+            self._depth_reason = 'Marker unavailable.'
+        else:
+            self.update_marker_depth(self.latest_marker.mask)
 
     def update_rgb_pixels(self, rgb: Image) -> None:
         """Decode RGB into a (height, width, 3) uint8 array, or None on error."""
@@ -209,6 +216,21 @@ class CameraListener(Node):
                 area = int(np.count_nonzero(detection.mask))
                 self.get_logger().info(f'Marker pixel: u={u:.2f}, v={v:.2f}, pixels={area}')
         self._marker_reason = reason
+
+    def update_marker_depth(self, marker_mask: NDArray[np.uint8]) -> None:
+        """Measure marker depth (never reusing an old value) and log changes."""
+        self.latest_marker_depth = None
+        if self.latest_depth_pixels is None:
+            self._depth_reason = 'Depth image unavailable.'
+            return
+        distance, reason = measure_marker_depth(self.latest_depth_pixels, marker_mask)
+        self.latest_marker_depth = distance
+        if reason != self._depth_reason:
+            if distance is None:
+                self.get_logger().warning('Marker depth unavailable: ' + reason)
+            else:
+                self.get_logger().info(f'Marker depth: {distance:.6f}m')
+        self._depth_reason = reason
 
 
 def main(args=None) -> None:
