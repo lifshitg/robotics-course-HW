@@ -1,9 +1,15 @@
-"""Reconstruct the red marker in the camera frame."""
+"""Reconstruct the red marker in the camera frame and compute a hover goal."""
 
 from dataclasses import dataclass
 import math
 
+from geometry_msgs.msg import PointStamped
+import numpy as np
 from sensor_msgs.msg import CameraInfo
+
+
+BASE_FRAME = 'base_link'
+HOVER_OFFSET_METRES = 0.08
 
 
 @dataclass(frozen=True)
@@ -39,3 +45,20 @@ def pixel_to_optical_point(
     y = (v - intrinsics.cy) * depth / intrinsics.fy
     x = (u - intrinsics.cx - intrinsics.skew * y / depth) * depth / intrinsics.fx
     return x, y, depth
+
+
+def hover_goal(target: PointStamped) -> PointStamped:
+    """Return the base_link goal HOVER_OFFSET_METRES above the marker."""
+    if target.header.frame_id != BASE_FRAME:
+        raise ValueError('Hover goals must be computed in base_link.')
+    goal = PointStamped(header=target.header)
+    goal.point.x = target.point.x
+    goal.point.y = target.point.y
+    goal.point.z = target.point.z + HOVER_OFFSET_METRES
+    return goal
+
+
+def _xyz(point) -> np.ndarray:
+    """Return a Point (or PointStamped) as a numpy array."""
+    point = getattr(point, 'point', point)
+    return np.array([point.x, point.y, point.z], dtype=float)
