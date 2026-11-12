@@ -130,7 +130,7 @@ def _decoded(pixels: NDArray | None) -> NDArray:
 
 
 class CameraListener(Node):
-    """Synchronize RGB/depth and decode each matched pair."""
+    """Synchronize RGB/depth, then store the marker pixel center."""
 
     def __init__(self, node_name: str = 'camera_listener', **node_options) -> None:
         """Subscribe to RGB, depth (synchronized) and camera info."""
@@ -139,6 +139,9 @@ class CameraListener(Node):
         self.camera_info: CameraInfo | None = None
         self.latest_rgb_pixels: NDArray[np.uint8] | None = None
         self.latest_depth_pixels: NDArray[np.float32] | None = None
+        self.latest_red_mask: NDArray[np.uint8] | None = None
+        self.latest_marker: MarkerDetection | None = None
+        self._marker_reason: str | None = None
 
         qos = qos_profile_sensor_data
         self.image_subscription = Subscriber(self, Image, '/camera/image_raw', qos_profile=qos)
@@ -159,12 +162,17 @@ class CameraListener(Node):
         self.camera_info = message
 
     def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
-        """Decode a matched pair of RGB and depth images."""
+        """Decode a matched pair and find the marker."""
+        self.latest_red_mask = None
+        self.latest_marker = None
         self.latest_depth_pixels = None
         self.update_rgb_pixels(rgb)
         if self.latest_rgb_pixels is None:
+            self._marker_reason = 'RGB decoding failed.'
             return
         self.update_depth_pixels(depth, rgb)
+        self.latest_red_mask = make_red_mask(self.latest_rgb_pixels)
+        self.update_marker(self.latest_red_mask)
 
     def update_rgb_pixels(self, rgb: Image) -> None:
         """Decode RGB into a (height, width, 3) uint8 array, or None on error."""
@@ -188,6 +196,19 @@ class CameraListener(Node):
             self.get_logger().error(
                 f'Cannot decode aligned depth image ({depth.encoding}): {error}'
             )
+
+    def update_marker(self, mask: NDArray[np.uint8]) -> None:
+        """Detect the marker and log when the result changes."""
+        detection, reason = detect_marker(mask)
+        self.latest_marker = detection
+        if reason != self._marker_reason:
+            if detection is None:
+                self.get_logger().warning('Marker not detected: ' + reason)
+            else:
+                u, v = detection.pixel
+                area = int(np.count_nonzero(detection.mask))
+                self.get_logger().info(f'Marker pixel: u={u:.2f}, v={v:.2f}, pixels={area}')
+        self._marker_reason = reason
 
 
 def main(args=None) -> None:
