@@ -1,4 +1,4 @@
-"""Reconstruct the red marker in the camera frame and compute a hover goal."""
+"""Reconstruct the red marker, transform it with TF2 and hover the arm tip above it."""
 
 from dataclasses import dataclass
 import math
@@ -8,7 +8,13 @@ import numpy as np
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.parameter import Parameter
+from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, Image
+from std_msgs.msg import Header
+from tf2_geometry_msgs import do_transform_point
+from tf2_ros import TransformException
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 from .camera_listener import CameraListener
 
@@ -74,26 +80,40 @@ class Rejected(Exception):
 
 
 class MarkerReacher(CameraListener):
-    """Turn each camera pair into a marker estimate in the camera frame."""
+    """Turn each camera pair into a marker estimate in base_link."""
 
     def __init__(self) -> None:
-        """Add the camera target publisher."""
+        """Add TF2 and the target publishers."""
         super().__init__(
             'marker_reacher',
             parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)],
         )
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
         self.camera_target_publisher = self.create_publisher(
             PointStamped, '/hw01/target_camera', 10
         )
+        self.base_target_publisher = self.create_publisher(
+            PointStamped, '/hw01/target_base', 10
+        )
+
+        self.latest_target_base: PointStamped | None = None
         self._last_reason: str | None = None
 
     def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
         """Estimate the marker from this pair."""
         super().on_synchronized_images(rgb, depth)
         try:
-            self.estimate_target(rgb)
+            target = self.estimate_target(rgb)
         except Rejected as reason:
+            self.forget_observations()
             self.log_once(f'No target: {reason}', warning=True)
+            return
+        self.latest_target_base = target
+
+    def forget_observations(self) -> None:
+        """Drop the current target so it can never be reused."""
+        self.latest_target_base = None
 
     def log_once(self, message: str, warning: bool = False) -> None:
         """Log only when the message changes, to avoid one line per frame."""
@@ -106,12 +126,14 @@ class MarkerReacher(CameraListener):
             self.get_logger().info(message)
 
     def estimate_target(self, rgb: Image) -> PointStamped:
-        """Return the marker in the camera optical frame, or raise Rejected."""
+        """Return the marker in base_link for this pair, or raise Rejected."""
         camera_point = self.reconstruct(rgb)
         self.camera_target_publisher.publish(camera_point)
-        cam = _xyz(camera_point).round(3)
-        self.log_once(f'Marker camera={tuple(cam.tolist())}')
-        return camera_point
+        base_point = self.to_base_frame(camera_point)
+        self.base_target_publisher.publish(base_point)
+        cam, base = _xyz(camera_point).round(3), _xyz(base_point).round(3)
+        self.log_once(f'Marker camera={tuple(cam.tolist())} base={tuple(base.tolist())}')
+        return base_point
 
     def reconstruct(self, rgb: Image) -> PointStamped:
         """Back-project the marker pixel + depth into the image's optical frame."""
@@ -132,6 +154,21 @@ class MarkerReacher(CameraListener):
         point = PointStamped(header=rgb.header)
         point.point.x, point.point.y, point.point.z = xyz
         return point
+
+    def to_base_frame(self, camera_point: PointStamped) -> PointStamped:
+        """Transform the point into base_link with TF2 at the image timestamp."""
+        source = camera_point.header.frame_id
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                BASE_FRAME, source, Time.from_msg(camera_point.header.stamp)
+            )
+        except TransformException as error:
+            raise Rejected(f'TF {source} -> {BASE_FRAME} unavailable: {error}') from error
+        base_point = do_transform_point(camera_point, transform)
+        base_point.header = Header(stamp=camera_point.header.stamp, frame_id=BASE_FRAME)
+        if not np.all(np.isfinite(_xyz(base_point))):
+            raise Rejected('transformed marker point is not finite.')
+        return base_point
 
 
 def main(args=None) -> None:
