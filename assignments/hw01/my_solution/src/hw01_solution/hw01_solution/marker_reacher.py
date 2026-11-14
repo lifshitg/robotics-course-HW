@@ -5,7 +5,12 @@ import math
 
 from geometry_msgs.msg import PointStamped
 import numpy as np
-from sensor_msgs.msg import CameraInfo
+import rclpy
+from rclpy.executors import ExternalShutdownException
+from rclpy.parameter import Parameter
+from sensor_msgs.msg import CameraInfo, Image
+
+from .camera_listener import CameraListener
 
 
 BASE_FRAME = 'base_link'
@@ -62,3 +67,86 @@ def _xyz(point) -> np.ndarray:
     """Return a Point (or PointStamped) as a numpy array."""
     point = getattr(point, 'point', point)
     return np.array([point.x, point.y, point.z], dtype=float)
+
+
+class Rejected(Exception):
+    """This observation cannot be used; the message says why."""
+
+
+class MarkerReacher(CameraListener):
+    """Turn each camera pair into a marker estimate in the camera frame."""
+
+    def __init__(self) -> None:
+        """Add the camera target publisher."""
+        super().__init__(
+            'marker_reacher',
+            parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)],
+        )
+        self.camera_target_publisher = self.create_publisher(
+            PointStamped, '/hw01/target_camera', 10
+        )
+        self._last_reason: str | None = None
+
+    def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
+        """Estimate the marker from this pair."""
+        super().on_synchronized_images(rgb, depth)
+        try:
+            self.estimate_target(rgb)
+        except Rejected as reason:
+            self.log_once(f'No target: {reason}', warning=True)
+
+    def log_once(self, message: str, warning: bool = False) -> None:
+        """Log only when the message changes, to avoid one line per frame."""
+        if message == self._last_reason:
+            return
+        self._last_reason = message
+        if warning:
+            self.get_logger().warning(message)
+        else:
+            self.get_logger().info(message)
+
+    def estimate_target(self, rgb: Image) -> PointStamped:
+        """Return the marker in the camera optical frame, or raise Rejected."""
+        camera_point = self.reconstruct(rgb)
+        self.camera_target_publisher.publish(camera_point)
+        cam = _xyz(camera_point).round(3)
+        self.log_once(f'Marker camera={tuple(cam.tolist())}')
+        return camera_point
+
+    def reconstruct(self, rgb: Image) -> PointStamped:
+        """Back-project the marker pixel + depth into the image's optical frame."""
+        if self.latest_marker is None or self.latest_marker_depth is None:
+            raise Rejected('marker or its depth is unavailable.')
+        info = self.camera_info
+        if info is None:
+            raise Rejected('no camera calibration received yet.')
+        if info.header.frame_id != rgb.header.frame_id:
+            raise Rejected('camera calibration frame does not match the image frame.')
+        u, v = self.latest_marker.pixel
+        try:
+            xyz = pixel_to_optical_point(
+                u, v, self.latest_marker_depth, intrinsics_from_camera_info(info)
+            )
+        except ValueError as error:
+            raise Rejected(f'cannot reconstruct marker: {error}') from error
+        point = PointStamped(header=rgb.header)
+        point.point.x, point.point.y, point.point.z = xyz
+        return point
+
+
+def main(args=None) -> None:
+    """Run the marker reacher until interrupted."""
+    rclpy.init(args=args)
+    node = MarkerReacher()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
