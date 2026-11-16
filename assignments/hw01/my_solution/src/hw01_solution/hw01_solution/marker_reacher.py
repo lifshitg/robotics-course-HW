@@ -2,10 +2,12 @@
 
 from dataclasses import dataclass
 import math
+import time
 
 from geometry_msgs.msg import PointStamped
 import numpy as np
 import rclpy
+from rclpy.clock import Clock, ClockType
 from rclpy.executors import ExternalShutdownException
 from rclpy.parameter import Parameter
 from rclpy.time import Time
@@ -21,6 +23,8 @@ from .camera_listener import CameraListener
 
 BASE_FRAME = 'base_link'
 HOVER_OFFSET_METRES = 0.08
+MAX_OBSERVATION_AGE_SECONDS = 0.5
+MAX_CAMERA_SILENCE_WALL_SECONDS = 2.0
 
 
 @dataclass(frozen=True)
@@ -98,11 +102,20 @@ class MarkerReacher(CameraListener):
         )
 
         self.latest_target_base: PointStamped | None = None
+        self.last_camera_wall: float | None = None
         self._last_reason: str | None = None
+        self._camera_silent = False
+
+        wall_clock = Clock(clock_type=ClockType.SYSTEM_TIME)
+        self.create_timer(0.5, self.check_camera_silence, clock=wall_clock)
 
     def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
         """Estimate the marker from this pair."""
         super().on_synchronized_images(rgb, depth)
+        self.last_camera_wall = time.monotonic()
+        if self._camera_silent:
+            self._camera_silent = False
+            self.get_logger().info('Fresh camera data resumed.')
         try:
             target = self.estimate_target(rgb)
         except Rejected as reason:
@@ -110,6 +123,17 @@ class MarkerReacher(CameraListener):
             self.log_once(f'No target: {reason}', warning=True)
             return
         self.latest_target_base = target
+
+    def check_camera_silence(self) -> None:
+        """Wall-clock timer: forget observations after 2 s without camera data."""
+        if self.last_camera_wall is None:
+            return
+        if time.monotonic() - self.last_camera_wall <= MAX_CAMERA_SILENCE_WALL_SECONDS:
+            return
+        self.forget_observations()
+        if not self._camera_silent:
+            self._camera_silent = True
+            self.get_logger().warning('No camera data for 2 wall-clock seconds; not moving.')
 
     def forget_observations(self) -> None:
         """Drop the current target so it can never be reused."""
@@ -127,6 +151,7 @@ class MarkerReacher(CameraListener):
 
     def estimate_target(self, rgb: Image) -> PointStamped:
         """Return the marker in base_link for this pair, or raise Rejected."""
+        self.check_fresh(rgb)
         camera_point = self.reconstruct(rgb)
         self.camera_target_publisher.publish(camera_point)
         base_point = self.to_base_frame(camera_point)
@@ -134,6 +159,17 @@ class MarkerReacher(CameraListener):
         cam, base = _xyz(camera_point).round(3), _xyz(base_point).round(3)
         self.log_once(f'Marker camera={tuple(cam.tolist())} base={tuple(base.tolist())}')
         return base_point
+
+    def check_fresh(self, rgb: Image) -> None:
+        """Reject observations older than 0.5 simulated seconds."""
+        now = self.get_clock().now()
+        if now.nanoseconds == 0:
+            raise Rejected('waiting for simulation time on /clock.')
+        age = (now - Time.from_msg(rgb.header.stamp)).nanoseconds / 1e9
+        if age > MAX_OBSERVATION_AGE_SECONDS:
+            raise Rejected(f'observation is stale ({age:.2f} simulated seconds old).')
+        if age < -MAX_OBSERVATION_AGE_SECONDS:
+            raise Rejected('observation timestamp is in the future (clock reset?).')
 
     def reconstruct(self, rgb: Image) -> PointStamped:
         """Back-project the marker pixel + depth into the image's optical frame."""
