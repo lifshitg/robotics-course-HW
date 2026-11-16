@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import math
 import time
 
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import PointStamped, PoseStamped
+from hw01_sim.arm_client import ArmClient
 import numpy as np
 import rclpy
 from rclpy.clock import Clock, ClockType
@@ -25,6 +26,9 @@ BASE_FRAME = 'base_link'
 HOVER_OFFSET_METRES = 0.08
 MAX_OBSERVATION_AGE_SECONDS = 0.5
 MAX_CAMERA_SILENCE_WALL_SECONDS = 2.0
+REACH_TOLERANCE_METRES = 0.02
+MAX_MOTION_ATTEMPTS = 3
+RETRY_DELAY_WALL_SECONDS = 2.0
 
 
 @dataclass(frozen=True)
@@ -84,14 +88,15 @@ class Rejected(Exception):
 
 
 class MarkerReacher(CameraListener):
-    """Turn each camera pair into a marker estimate in base_link."""
+    """Turn each camera pair into a marker estimate; send at most one motion."""
 
     def __init__(self) -> None:
-        """Add TF2 and the target publishers."""
+        """Add calibration, TF2, target publishers and the motion helper."""
         super().__init__(
             'marker_reacher',
             parameter_overrides=[Parameter('use_sim_time', Parameter.Type.BOOL, True)],
         )
+        self.latest_tip: PoseStamped | None = None
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         self.camera_target_publisher = self.create_publisher(
@@ -100,17 +105,27 @@ class MarkerReacher(CameraListener):
         self.base_target_publisher = self.create_publisher(
             PointStamped, '/hw01/target_base', 10
         )
+        self.create_subscription(PoseStamped, '/hw01/measured_tip', self.on_tip, 10)
+        self.arm = ArmClient(self)
 
         self.latest_target_base: PointStamped | None = None
         self.last_camera_wall: float | None = None
+        self.active_goal: PointStamped | None = None
+        self.done = False
+        self.failed_attempts = 0
+        self.retry_after_wall = 0.0
         self._last_reason: str | None = None
         self._camera_silent = False
 
         wall_clock = Clock(clock_type=ClockType.SYSTEM_TIME)
         self.create_timer(0.5, self.check_camera_silence, clock=wall_clock)
 
+    def on_tip(self, message: PoseStamped) -> None:
+        """Keep the physics-measured tip pose."""
+        self.latest_tip = message
+
     def on_synchronized_images(self, rgb: Image, depth: Image) -> None:
-        """Estimate the marker from this pair."""
+        """Estimate the marker from this pair and maybe start a motion."""
         super().on_synchronized_images(rgb, depth)
         self.last_camera_wall = time.monotonic()
         if self._camera_silent:
@@ -123,6 +138,7 @@ class MarkerReacher(CameraListener):
             self.log_once(f'No target: {reason}', warning=True)
             return
         self.latest_target_base = target
+        self.consider_motion(target)
 
     def check_camera_silence(self) -> None:
         """Wall-clock timer: forget observations after 2 s without camera data."""
@@ -205,6 +221,71 @@ class MarkerReacher(CameraListener):
         if not np.all(np.isfinite(_xyz(base_point))):
             raise Rejected('transformed marker point is not finite.')
         return base_point
+
+    def consider_motion(self, target: PointStamped) -> None:
+        """Send a hover goal from this fresh observation unless something blocks it."""
+        if not self.may_send():
+            return
+        goal = hover_goal(target)
+        self.active_goal = goal
+        x, y, z = _xyz(goal)
+        self.get_logger().info(f'Sending hover goal ({x:.3f}, {y:.3f}, {z:.3f}) in base_link.')
+        self.arm.move_to_point(goal).add_done_callback(self.on_motion_done)
+
+    def may_send(self) -> bool:
+        """Check the one-motion rule, an earlier success and retry limits."""
+        if self.done or self.arm.busy or self.failed_attempts >= MAX_MOTION_ATTEMPTS:
+            return False
+        if time.monotonic() < self.retry_after_wall:
+            return False
+        if not self.arm.ready():
+            self.get_logger().warning('Motion helper not available yet.', throttle_duration_sec=5)
+            return False
+        return True
+
+    def on_motion_done(self, future) -> None:
+        """Log the helper result, double-checked against the measured tip."""
+        goal, self.active_goal = self.active_goal, None
+        if goal is None:
+            return
+        result = future.result()
+        if not result.success:
+            self.record_failure(result.message)
+            return
+        error = self.measured_tip_error(goal)
+        if error is not None and error > REACH_TOLERANCE_METRES:
+            self.record_failure(f'helper reported success but the tip is {error:.4f} m away')
+            return
+        tip = self.latest_tip
+        where = '' if tip is None else ' at ({:.3f}, {:.3f}, {:.3f})'.format(
+            *_xyz(tip.pose.position)
+        )
+        checked = (
+            'no fresh measured tip' if error is None
+            else f'tip {error:.4f} m from goal{where}'
+        )
+        self.get_logger().info(f'Motion succeeded: {result.message} ({checked}).')
+        self.done = True
+
+    def record_failure(self, message: str) -> None:
+        """Count a failed motion and schedule a retry from a fresh observation."""
+        self.failed_attempts += 1
+        self.retry_after_wall = time.monotonic() + RETRY_DELAY_WALL_SECONDS
+        give_up = self.failed_attempts >= MAX_MOTION_ATTEMPTS
+        self.get_logger().error(
+            f'Motion failed ({self.failed_attempts}/{MAX_MOTION_ATTEMPTS}): {message}; '
+            + ('giving up.' if give_up else 'will retry from a fresh observation.')
+        )
+
+    def measured_tip_error(self, goal: PointStamped) -> float | None:
+        """Distance from the measured tip to the goal; None if missing or stale."""
+        tip = self.latest_tip
+        if tip is None or tip.header.frame_id != BASE_FRAME:
+            return None
+        age = (self.get_clock().now() - Time.from_msg(tip.header.stamp)).nanoseconds / 1e9
+        if abs(age) > MAX_OBSERVATION_AGE_SECONDS:
+            return None
+        return float(np.linalg.norm(_xyz(tip.pose.position) - _xyz(goal)))
 
 
 def main(args=None) -> None:
