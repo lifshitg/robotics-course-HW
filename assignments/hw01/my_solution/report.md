@@ -110,14 +110,3 @@ ros2 run hw01_sim readiness_demo
 python3 my_solution/check_setup.py
 ```
 
-## Results
-
-Record the action result and the independent observer's measured error, hold, and
-contact result for each preset after running the demonstrations. These results
-have not yet been measured.
-
-| Preset | Action result | Observer result, error, and contacts |
-| --- | --- | --- |
-| 1 | Not yet run | Not yet measured |
-| 2 | Not yet run | Not yet measured |
-| 3 | Not yet run | Not yet measured |
