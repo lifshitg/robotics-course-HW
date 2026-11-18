@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import math
+import signal
 import time
 
 from geometry_msgs.msg import PointStamped, PoseStamped
@@ -11,6 +12,7 @@ import rclpy
 from rclpy.clock import Clock, ClockType
 from rclpy.executors import ExternalShutdownException
 from rclpy.parameter import Parameter
+from rclpy.signals import SignalHandlerOptions
 from rclpy.time import Time
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import Header
@@ -114,6 +116,7 @@ class MarkerReacher(CameraListener):
         self.done = False
         self.failed_attempts = 0
         self.retry_after_wall = 0.0
+        self.shutting_down = False
         self._last_reason: str | None = None
         self._camera_silent = False
 
@@ -269,6 +272,9 @@ class MarkerReacher(CameraListener):
 
     def record_failure(self, message: str) -> None:
         """Count a failed motion and schedule a retry from a fresh observation."""
+        if self.shutting_down:
+            self.get_logger().info(f'Motion stopped: {message}')
+            return
         self.failed_attempts += 1
         self.retry_after_wall = time.monotonic() + RETRY_DELAY_WALL_SECONDS
         give_up = self.failed_attempts >= MAX_MOTION_ATTEMPTS
@@ -287,16 +293,37 @@ class MarkerReacher(CameraListener):
             return None
         return float(np.linalg.norm(_xyz(tip.pose.position) - _xyz(goal)))
 
+    def cancel_motion(self, timeout_sec: float = 2.0) -> None:
+        """Cancel a pending motion and spin briefly so the request is delivered."""
+        self.shutting_down = True
+        if not self.arm.busy:
+            return
+        self.get_logger().info('Cancelling pending motion.')
+        self.arm.cancel()
+        deadline = time.monotonic() + timeout_sec
+        while self.arm.busy and rclpy.ok() and time.monotonic() < deadline:
+            rclpy.spin_once(self, timeout_sec=0.1)
+
+
+def _interrupt(signum, frame) -> None:
+    raise KeyboardInterrupt
+
 
 def main(args=None) -> None:
-    """Run the marker reacher until interrupted."""
-    rclpy.init(args=args)
+    """Run until interrupted, then cancel any pending motion before exiting."""
+    rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
+    signal.signal(signal.SIGINT, _interrupt)
+    signal.signal(signal.SIGTERM, _interrupt)
     node = MarkerReacher()
     try:
         rclpy.spin(node)
-    except (KeyboardInterrupt, ExternalShutdownException):
+    except KeyboardInterrupt:
+        node.get_logger().info('Interrupted.')
+    except ExternalShutdownException:
         pass
     finally:
+        if rclpy.ok():
+            node.cancel_motion()
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
