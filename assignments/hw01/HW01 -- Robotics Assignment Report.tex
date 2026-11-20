@@ -1,0 +1,62 @@
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\title{HW01 -- Robotics Assignment Report}
+\author{Tomer Sananes & Gil Pasi}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Assignment Objective}
+
+The objective of this assignment is to detect a red marker using a camera, calculate its position in 3D space, and move a robotic arm to a target point above the marker without touching it.
+
+\section{Solution Overview}
+
+\subsection{Step 1 -- Receiving Camera Data}
+
+The system receives an RGB image, a depth image, and camera calibration information (CameraInfo).
+
+The RGB and depth images are synchronized using their timestamps to ensure that both measurements correspond approximately to the same moment.
+
+\subsection{Step 2 -- Marker Detection}
+
+The RGB image is converted to the HSV color space to simplify red color detection.
+
+Noise filtering is then applied, and the largest connected red region is selected. The center of this region is used to estimate the marker's pixel position.
+
+The marker's depth is calculated using the median of the valid depth values within the detected region, reducing the influence of outliers.
+
+\subsection{Step 3 -- Calculating the 3D Position}
+
+Using the \textbf{Pinhole Camera Model}, the marker's pixel coordinates, depth, and camera calibration parameters are used to calculate its position in the camera coordinate frame:
+
+\begin{equation}
+    X = \frac{(u-c_x)Z}{f_x},
+    \qquad
+    Y = \frac{(v-c_y)Z}{f_y}
+\end{equation}
+
+The marker's position is then transformed into the robot's base coordinate frame (\texttt{base\_link}) using the corresponding transformation.
+
+Finally, 8 cm is added to the Z coordinate. This value represents the \textbf{fixed height difference between the marker and the target position}, as specified in the assignment. The resulting point is used as the robotic arm's movement target.
+
+\section{Code Structure}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{student\_solution.py} -- The main file, responsible for receiving camera data, synchronizing images, publishing the marker's position, and sending movement commands to the robotic arm.
+
+    \item \textbf{utils.py} -- Contains helper functions for image processing, marker detection, 3D position calculation, and coordinate transformations.
+\end{itemize}
+
+\section{Summary}
+
+We implemented a system that detects a red marker from camera images, calculates its 3D position, and automatically moves the robotic arm to the target point above it.
+
+\end{document}
