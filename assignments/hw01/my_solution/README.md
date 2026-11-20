@@ -47,3 +47,9 @@ Keep spinning your ROS node while the motion runs. When `future.done()` is true,
 subscription callback waiting for the result. Call `arm.cancel()` to cancel a
 pending motion. Only one motion may be active; coordinates use metres, and this
 arm's fixed tip height is 0.14 m. The helper handles kinematics for you.
+
+## Assignment solution
+
+The `hw01_solution/` directory contains the student ROS 2 package. See
+[report.md](report.md) for the detection and depth methods, failure handling,
+exact build and run commands, and the results to record for all three presets.
