@@ -110,3 +110,18 @@ ros2 run hw01_sim readiness_demo
 python3 my_solution/check_setup.py
 ```
 
+## Results
+
+Each preset was run in a freshly started simulation, with the independent
+`check_reach` observer started before the solution node, using the commands above.
+The same implementation was used for all three runs.
+
+| Preset | Commanded hover goal in `base_link` | Action result | Observer result, error, and contacts |
+| --- | --- | --- | --- |
+| 1 | (0.352, −0.147, 0.140) m | Success: trajectory completed | PASS: 0.0033 m tip error, held 2 simulated seconds |
+| 2 | (0.401, 0.002, 0.140) m | Success: trajectory completed | PASS: 0.0022 m tip error, held 2 simulated seconds |
+| 3 | (0.352, 0.151, 0.140) m | Success: trajectory completed | PASS: 0.0023 m tip error, held 2 simulated seconds |
+
+In every run, the node sent exactly one goal, 2–6 seconds after starting, and sent
+no further goals after the motion succeeded. All tip errors are well within the
+0.02 m tolerance.
