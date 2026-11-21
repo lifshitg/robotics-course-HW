@@ -2,7 +2,7 @@
 Dor Katz and Gal Sasson
 
 
-The ROS2 node detects te red marker and moves the robot arm to hover above it.
+The ROS2 node detects the red marker and moves the robot arm to hover above it.
 
 
 ---- Setup: ----
@@ -27,10 +27,10 @@ The ROS2 node detects te red marker and moves the robot arm to hover above it.
 (If no region is found, no target exists and nothing is sent.)
 
 ---- Depth: ----
-* We ue the info from the depth camera
+* We use the info from the depth camera
 * Depth is read in a 3x3 pixel window around `(u, v)`. 
 * The median of the values is the depth `z`. (The median reduces the effect of noise in the depth camera) 
-* We use the camera parameters (fx,fy,cx,cy) to calculate the locatoin of the pixel in the 3D space:
+* We use the camera parameters (fx,fy,cx,cy) to calculate the loation of the pixel in the 3D space:
 x = (u - cx) * z / fx
 y = (v - cy) * z / fy
 z = depth
