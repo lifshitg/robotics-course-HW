@@ -6,7 +6,7 @@ adds the hover offset to z, and sends it to the motion helper (ArmClient). A tar
 only used if it is fresh, and it is cleared once sent, so an old target is never reused.
 
 Run (after sourcing ROS + the hw01 environment, simulation and point_detector running):
-    python3 arm_motion.py
+    ros2 run hw01_solution arm_motion
 """
 import time
 from copy import deepcopy

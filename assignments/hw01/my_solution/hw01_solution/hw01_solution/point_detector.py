@@ -13,12 +13,12 @@ Nothing is published when the detection, depth, TF or data freshness is bad, and
 no earlier target is ever reused.
 
 Run (after sourcing ROS + the hw01 environment, simulation running):
-    python3 point_detector.py
+    ros2 run hw01_solution point_detector
 """
 import cv2
 import numpy as np
 import rclpy
-import tf2_geometry_msgs
+import tf2_geometry_msgs  # noqa: F401  (registers PointStamped with the TF2 buffer)
 import tf2_ros
 from geometry_msgs.msg import PointStamped
 from message_filters import ApproximateTimeSynchronizer, Subscriber
@@ -184,7 +184,7 @@ class PointDetector(Node):
             rgb_msg: RGB image; its header stamp and frame_id are used for the output point.
             depth_msg: Aligned depth image paired with ``rgb_msg`` by timestamp.
         """
-        log =self.get_logger()
+        log = self.get_logger()
 
         if self.camera_info is None:
             log.warn('No CameraInfo yet.', throttle_duration_sec=2.0)
