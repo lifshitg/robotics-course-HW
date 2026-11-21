@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>hw01_solution</name>
+  <version>0.1.0</version>
+  <description>HW1 solution: red marker point detector and arm motion nodes.</description>
+  <maintainer email="yoavlevi@post.bgu.ac.il">Yoav Levin and Ziv Zaltsman</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>hw01_sim</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
