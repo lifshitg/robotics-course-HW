@@ -12,8 +12,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Yoav Levin',
-    maintainer_email='y_levin@apple.com',
+    maintainer='Yoav Levin & Ziv Zaltsman',
+    maintainer_email='yoavlevi@post.bgu.ac.il',
     description='HW1 solution: red marker point detector and arm motion nodes.',
     license='Apache-2.0',
     entry_points={

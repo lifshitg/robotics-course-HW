@@ -3,7 +3,7 @@
   <name>hw01_solution</name>
   <version>0.1.0</version>
   <description>HW1 solution: red marker point detector and arm motion nodes.</description>
-  <maintainer email="y_levin@apple.com">Yoav Levin</maintainer>
+  <maintainer email="yoavlevi@post.bgu.ac.il">Yoav Levin and Ziv Zaltsman</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_python</buildtool_depend>
